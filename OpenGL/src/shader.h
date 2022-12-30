@@ -22,6 +22,11 @@ public:
 	void UploadFloat(const std::string& name, float val);
 	void UploadInt(const std::string& name, int val);
 	void UploadIntArray(const std::string& name, int* values, uint32_t count);
+
+	inline uint32_t GetID() const
+	{
+		return mID;
+	}
 private:
 	uint32_t mID;
 	uint32_t CompileShader(const std::string& shaderSource, GLenum shaderType);

@@ -26,7 +26,6 @@ void main() {
 
 	gl_Position = uProj * uView * uModel * vec4(aPosition, 1.0);
 
-	
 	float distance = length(positionRelativeToCam.xyz);
 	visibility = exp(-pow((distance * density), gradient));
 	visibility = clamp(visibility, 0.0, 1.0);

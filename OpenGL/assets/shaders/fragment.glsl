@@ -15,6 +15,7 @@ in vec4 gl_FragCoord;
 
 void main() {
     oColor = texture(uTexture, vTexcoord); 
+    oColor = mix(vec4(0.0, 0.0, 0.0, 1.0), oColor, vLighting);
     oColor = mix(vec4(uFogColor), oColor, visibility);
 
 }

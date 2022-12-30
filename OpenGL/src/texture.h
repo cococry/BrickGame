@@ -23,6 +23,10 @@ public:
 	{
 		return mData;
 	}
+	inline uint32_t GetID() const
+	{
+		return mID;
+	}
 private:
 	uint32_t mID;
 	Texture2DData mData;

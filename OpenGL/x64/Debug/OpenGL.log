@@ -1,19 +1,7 @@
-﻿  cube.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xutility(224,49): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\memory(2023,1): message : see reference to function template instantiation 'void std::_Construct_in_place<_Ty,float(&)[216],unsigned __int64>(_Ty &,float (&)[216],unsigned __int64 &&) noexcept(false)' being compiled
-          with
-          [
-              _Ty=VertexBuffer
-          ]
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\memory(2703,36): message : see reference to function template instantiation 'std::_Ref_count_obj2<VertexBuffer>::_Ref_count_obj2<float(&)[216],_Ty>(float (&)[216],_Ty &&)' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\memory(2704,20): message : see reference to function template instantiation 'std::_Ref_count_obj2<VertexBuffer>::_Ref_count_obj2<float(&)[216],_Ty>(float (&)[216],_Ty &&)' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
-C:\Users\valen\source\repos\OpenGL\OpenGL\src\cube.cpp(64,94): message : see reference to function template instantiation 'std::shared_ptr<VertexBuffer> std::make_shared<VertexBuffer,float(&)[216],size_t>(float (&)[216],size_t &&)' being compiled
-  OpenGL.vcxproj -> C:\Users\valen\source\repos\OpenGL\x64\Debug\OpenGL.exe
+﻿  main.cpp
+D:\Dev\BrickGame\OpenGL\src\main.cpp(121,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(145,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(148,23): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(359,24): warning C4838: Konvertierung von "FT_Pos" zu "unsigned int" erfordert eine einschränkende Konvertierung
+D:\Dev\BrickGame\OpenGL\src\main.cpp(431,12): warning C4244: "Argument": Konvertierung von "time_t" in "unsigned int", möglicher Datenverlust
+  OpenGL.vcxproj -> D:\Dev\BrickGame\x64\Debug\OpenGL.exe
