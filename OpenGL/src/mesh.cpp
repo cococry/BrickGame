@@ -49,7 +49,6 @@ void Mesh::Render()
             else if (name == "texture_specular")
                 number = std::to_string(specularNr++);
 
-            std::cout << name << "\n";
             RenderState::GetShader()->UploadInt(name, i);
             glBindTextureUnit(GL_TEXTURE0 + i, textures[i].get_id());
             textures[i].bind();
@@ -59,6 +58,8 @@ void Mesh::Render()
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    RenderState::GetShader()->Bind();
+    RenderState::GetShader()->UploadVec4("uColor", glm::vec4(1.0f));
     if (!no_textures) {
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0);

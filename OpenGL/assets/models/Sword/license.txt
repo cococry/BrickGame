@@ -1,0 +1,11 @@
+Model Information:
+* title:	Iron Katana (low Poly)
+* source:	https://sketchfab.com/3d-models/iron-katana-low-poly-df2b77b854ed437ead237a8d149f2d8b
+* author:	Three Dog Night (https://sketchfab.com/ThreeDogNight404)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Iron Katana (low Poly)" (https://sketchfab.com/3d-models/iron-katana-low-poly-df2b77b854ed437ead237a8d149f2d8b) by Three Dog Night (https://sketchfab.com/ThreeDogNight404) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
