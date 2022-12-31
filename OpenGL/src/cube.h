@@ -2,9 +2,7 @@
 
 #include <glm/glm.hpp> 
 #include <memory>
-
-#include "texture.h"
-#include "vertex_array.h"
+#include "model.h"
 
 struct AABB
 {
@@ -26,8 +24,8 @@ class Cube
 {
 public:
 	Cube() = default;
-	Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Texture2D>& texture,
-		const std::string& name = "Cube");
+	Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Model>& model,
+		const std::string& name = "Cube", const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& halfScale = glm::vec3(0.0f));
 	~Cube();
 
 	void Render();
@@ -36,10 +34,6 @@ public:
 
 	bool ColldingWithCube(const Cube& cube);
 
-	inline const std::shared_ptr<Texture2D>& GetTexture() const
-	{
-		return mTexture;
-	}
 	inline bool operator==(const Cube& other)
 	{
 		return Position == other.Position;
@@ -52,10 +46,10 @@ public:
 
 	glm::vec3 Position;
 	glm::vec3 Scale;
+	glm::vec3 Rotation;
 
 	AABB Aabb;
 private:
+	std::shared_ptr<Model> mModel;
 	std::string mName;
-	std::shared_ptr<Texture2D> mTexture;
-	std::shared_ptr<VertexArray> mVertexArray;
 };

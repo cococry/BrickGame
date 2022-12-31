@@ -1,34 +1,30 @@
 #pragma once
 
-#include <string>
 #include <glad/glad.h>
+#include <string>
+#include <assimp/scene.h>
 
-struct Texture2DData
-{
-	uint32_t Width, Height;
-	std::string Filepath;
-	uint32_t NumberOfChannels;
-	GLenum DataFormat, InternalFormat;
-};
-class Texture2D 
+class texture 
 {
 public:
-	Texture2D(const std::string& filepath);
-	~Texture2D();
+	texture() = default;
+	texture(const std::string& dir, const std::string& path, aiTextureType type, bool flipped = true);
 
-	void Bind(uint32_t slot);
-	void Delete();
+	void bind();
+	void unbind();
+	void delete_id();
 
-	inline const Texture2DData& GetData() const
-	{
-		return mData;
-	}
-	inline uint32_t GetID() const
-	{
-		return mID;
-	}
+	void activate(int32_t slot = 0);
+
+	inline int32_t get_width() const { return m_Width; }
+	inline int32_t get_height() const { return m_Height; }
+	inline int32_t get_channels() const { return m_NChannels; }
+
+	inline int32_t get_id() const { return m_id; }
+	aiTextureType Type;
+	std::string Dir, Path;
+
 private:
-	uint32_t mID;
-	Texture2DData mData;
-	
+	int32_t m_Width, m_Height, m_NChannels;
+	uint32_t m_id;
 };

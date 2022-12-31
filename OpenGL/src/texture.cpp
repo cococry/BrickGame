@@ -1,67 +1,61 @@
 #include "texture.h"
-#include <stb_image.h>
 #include <iostream>
 
-Texture2D::Texture2D(const std::string& filepath)
+#include <stb_image.h>
+
+texture::texture(const std::string& dir, const std::string& path, aiTextureType type, bool flipped)
+	: Dir(dir), Path(path), Type(type)
 {
-	mData.Filepath = filepath;
 
-	int width, height, channels;
-	stbi_set_flip_vertically_on_load(true);
-	stbi_uc* data = nullptr;
-	data = stbi_load(filepath.c_str(), &width, &height, &channels, 0);
+	glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 
-	if (data == nullptr) 
-	{
-		std::cout << "Failed to load texture at location '" << filepath << "'.\n";
-		return;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	stbi_set_flip_vertically_on_load(flipped);
+
+	uint8_t* data = stbi_load((dir + "/" + path).c_str(), &m_Width, &m_Height, &m_NChannels, 0);
+
+	GLenum internalFormat = GL_RGB;
+	GLenum format = GL_RGB;
+
+	if (m_NChannels == 4) {
+		internalFormat = GL_RGBA;
+		format = GL_RGBA;
 	}
 
-	mData.Width = width;
-	mData.Height = height;
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	GLenum internalFormat = 0, dataFormat = 0;
-	if (channels == 4)
-	{
-		internalFormat = GL_RGBA8;
-		dataFormat = GL_RGBA;
 	}
-	if (channels == 3)
-	{
-		internalFormat = GL_RGB8;
-		dataFormat = GL_RGB;
+	else {
+		std::cout << "Failed to load texture at location " << (dir + "/" + path) << "\n";
 	}
-
-	mData.InternalFormat = internalFormat;
-	mData.DataFormat = dataFormat;
-
-
-	glCreateTextures(GL_TEXTURE_2D, 1, &mID);
-	glTextureStorage2D(mID, 1, internalFormat, mData.Width, mData.Height);
-
-	glTextureParameteri(mID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(mID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTextureParameteri(mID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(mID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTextureSubImage2D(mID, 0, 0, 0, mData.Width, mData.Height, dataFormat, GL_UNSIGNED_BYTE, data);
 
 	stbi_image_free(data);
 }
 
-Texture2D::~Texture2D()
+void texture::bind()
 {
-	glDeleteTextures(1, &mID);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
-void Texture2D::Bind(uint32_t slot)
+void texture::activate(int32_t slot)
 {
-  	glBindTextureUnit(slot, mID);
+	glActiveTexture(GL_TEXTURE0 + slot);
 }
 
-
-void Texture2D::Delete()
+void texture::unbind()
 {
-	glDeleteTextures(1, &mID);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void texture::delete_id()
+{
+	glDeleteTextures(1, &m_id);
 }

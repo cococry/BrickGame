@@ -1,0 +1,11 @@
+Model Information:
+* title:	.45 bullet
+* source:	https://sketchfab.com/3d-models/45-bullet-817c71ce020343b89b4a3fc32894ccac
+* author:	triMakar (https://sketchfab.com/triMakar)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on ".45 bullet" (https://sketchfab.com/3d-models/45-bullet-817c71ce020343b89b4a3fc32894ccac) by triMakar (https://sketchfab.com/triMakar) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

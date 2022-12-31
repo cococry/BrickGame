@@ -5,74 +5,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-Cube::Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Texture2D>& texture,
-	const std::string& name)
+Cube::Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Model>& model,
+	const std::string& name, const glm::vec3& rotation, const glm::vec3& halfScale)
 {
 	Position = position;
 	Scale = scale;
-	mTexture = texture;
+	mModel = model;
 	mName = name;
 	Aabb.Position = position;
-	Aabb.HalfSize = scale / 2.0f;
-
-	float vertices[] = {
-			-0.5f, -0.5f, -0.5f,    0.0f, 0.0f,			0.9f,
-			 0.5f, -0.5f, -0.5f,    1.0f, 0.0f,			0.9f,
-			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,			0.9f,
-			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,			0.9f,
-			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f,			0.9f,
-			-0.5f, -0.5f, -0.5f,    0.0f, 0.0f,			0.9f,
-
-			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,			0.6f,
-			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,			0.6f,
-			 0.5f,  0.5f,  0.5f,    1.0f, 1.0f,			0.6f,
-			 0.5f,  0.5f,  0.5f,    1.0f, 1.0f,			0.6f,
-			-0.5f,  0.5f,  0.5f,    0.0f, 1.0f,			0.6f,
-			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,			0.6f,
-
-			-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.6f,
-			-0.5f,  0.5f, -0.5f,    1.0f, 1.0f,			0.6f,
-			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			0.6f,
-			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			0.6f,
-			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,			0.6f,
-			-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.6f,
-
-			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.7f,
-			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,			0.7f,
-			 0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			0.7f,
-			 0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			0.7f,
-			 0.5f, -0.5f,  0.5f,    0.0f, 0.0f,			0.7f,
-			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.7f,
-
-			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			1.0f,
-			 0.5f, -0.5f, -0.5f,    1.0f, 1.0f,			1.0f,
-			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,			1.0f,
-			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,			1.0f,
-			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,			1.0f,
-			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,			1.0f,
-
-			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f,			0.55f,
-			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,			0.55f,
-			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.55f,
-			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,			0.55f,
-			-0.5f,  0.5f,  0.5f,    0.0f, 0.0f,			0.55f,
-			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f,			0.55f
-	};
-
-	mVertexArray = std::make_shared<VertexArray>();
-
-	std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
-
-	vb->SetLayout({
-		{ "aPosition", VertexAttributeType::Vector3 },
-		{ "aTexcoord", VertexAttributeType::Vector2 },
-		{ "aTexcoord", VertexAttributeType::Float }
-		});
-
-	mVertexArray->AddVertexBuffer(vb);
-
-	RenderState::GetShader()->Bind();
-	RenderState::GetShader()->UploadInt("uTexture", 0);
+	if (halfScale == glm::vec3(0.0f))
+		Aabb.HalfSize = scale / 2.0f;
+	else
+		Aabb.HalfSize = halfScale;
+	Rotation = rotation;
 }
 
 Cube::~Cube()
@@ -82,15 +27,15 @@ Cube::~Cube()
 void Cube::Render()
 {
 	Aabb.Position = Position;
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), Position)
-		* glm::scale(glm::mat4(1.0f), Scale);
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), Position) * 
+		 glm::rotate(glm::mat4(1.0f), glm::radians(Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)) *
+		 glm::rotate(glm::mat4(1.0f), glm::radians(Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) *
+		 glm::rotate(glm::mat4(1.0f), glm::radians(Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)) *
+		 glm::scale(glm::mat4(1.0f), Scale);
 
 	RenderState::GetShader()->Bind();
 	RenderState::GetShader()->UploadMat4("uModel", model);
-	mTexture->Bind(0);
-	mVertexArray->Bind();
-	glBindTexture(GL_TEXTURE_2D, mTexture->GetID());
-	glDrawArrays(GL_TRIANGLES, 0, 36);	
+	mModel->Render();
 }
 
 bool Cube::ColldingWithPoint(const glm::vec3& point)

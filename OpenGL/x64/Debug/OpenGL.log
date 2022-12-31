@@ -1,7 +1,9 @@
 ﻿  main.cpp
-D:\Dev\BrickGame\OpenGL\src\main.cpp(121,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-D:\Dev\BrickGame\OpenGL\src\main.cpp(145,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-D:\Dev\BrickGame\OpenGL\src\main.cpp(148,23): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-D:\Dev\BrickGame\OpenGL\src\main.cpp(359,24): warning C4838: Konvertierung von "FT_Pos" zu "unsigned int" erfordert eine einschränkende Konvertierung
-D:\Dev\BrickGame\OpenGL\src\main.cpp(431,12): warning C4244: "Argument": Konvertierung von "time_t" in "unsigned int", möglicher Datenverlust
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\minwindef.h(130,1): warning C4005: "APIENTRY": Makro-Neudefinition
+D:\Dev\BrickGame\OpenGL\vendor\glfw\include\GLFW\glfw3.h(123,1): message : Siehe vorherige Definition von "APIENTRY"
+D:\Dev\BrickGame\OpenGL\src\main.cpp(124,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(150,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(153,23): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
+D:\Dev\BrickGame\OpenGL\src\main.cpp(367,24): warning C4838: Konvertierung von "FT_Pos" zu "unsigned int" erfordert eine einschränkende Konvertierung
+D:\Dev\BrickGame\OpenGL\src\main.cpp(439,12): warning C4244: "Argument": Konvertierung von "time_t" in "unsigned int", möglicher Datenverlust
   OpenGL.vcxproj -> D:\Dev\BrickGame\x64\Debug\OpenGL.exe

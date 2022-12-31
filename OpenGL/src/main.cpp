@@ -6,6 +6,7 @@
 #include <map>
 #include <ft2build.h>
 #include <irrKlang.h>
+#include <Windows.h>
 using namespace irrklang;
 
 #include "input.h"
@@ -14,9 +15,9 @@ using namespace irrklang;
 #include "texture.h"
 #include "time.h"
 #include "camera.h"
-#include "plane.h"
 #include "render_state.h"
 #include "cube_list.h"
+#include "model.h"
 
 #include FT_FREETYPE_H  
 
@@ -25,10 +26,6 @@ using namespace irrklang;
 global GLFWwindow* GLFWDisplay;
 global Camera Cam;
 global CubeList Cubes;
-global std::shared_ptr<Texture2D> CubeTexture = nullptr;
-global std::shared_ptr<Texture2D> Ak47Texture = nullptr;
-global std::shared_ptr<Texture2D> BulletTexture = nullptr;
-global std::shared_ptr<Texture2D> HeartTexture = nullptr;
 global float CubeSpawnTimer = 0.0f;
 global float CubeSpawnTickSpeed = 1.5f;
 global float CubeSpeed = 4.0f;
@@ -48,6 +45,12 @@ global Cube ak47InHand;
 global std::shared_ptr<Shader> FontShader;
 global std::vector<Cube*> Bullets = {};
 global ISoundEngine* SoundEngine = createIrrKlangDevice();
+global std::shared_ptr<Model> playerModel = nullptr;
+global std::shared_ptr<Model> astroidModel = nullptr;
+global std::shared_ptr<Model> heartModel = nullptr;
+global std::shared_ptr<Model> groundModel = nullptr;
+global std::shared_ptr<Model> ak47Model = nullptr;
+global std::shared_ptr<Model> skyModel = nullptr;
 
 
 #define windowWidth 1280.0f
@@ -119,21 +122,23 @@ void UpdateCubes()
 			if (LastCubeSpawnX == -1.0f)
 			{
 				float x_index = rand() % 5;
-				Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(1.0f), CubeTexture));
+				Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
+					glm::vec3(0.28f, 0.28f, 0.55f)));
 
 				bool addedCollectable = false;
 				if (rand() %  10 == 2)
 				{
 					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
-						glm::vec3(0.5f), HeartTexture, "Heart"));
+						glm::vec3(0.07f), heartModel, "Heart", glm::vec3(90.0f, 180.0f, 0.0f), glm::vec3(0.2f)));
 					addedCollectable = true;
-				 }
+					
+				}
 				if (!addedCollectable && !hasAk47 && !ak47InCubes)
 				{
 					if (rand() % 45 == 2)
 					{
 						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
-							glm::vec3(0.5f), Ak47Texture, "Ak47"));
+							glm::vec3(0.1f), ak47Model, "Ak47"));
 						addedCollectable = true;
 						ak47InCubes = true;
 					}
@@ -147,21 +152,23 @@ void UpdateCubes()
 				{
 					x_index = rand() % 5;
 				}
-				Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(1.0f), CubeTexture));
-
+				Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
+					glm::vec3(0.28f, 0.28f, 0.55f)));
 				bool addedCollectable = false;
 				if (rand() % 10 == 2)
 				{
 					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
-						glm::vec3(0.5f), HeartTexture, "Heart"));
+						glm::vec3(0.07f), heartModel, "Heart", glm::vec3(90.0f, 180.0f, 0.0f), glm::vec3(0.2f)));
 					addedCollectable = true;
+					
+					
 				}
 				if (!addedCollectable && !hasAk47 && !ak47InCubes)
 				{
 					if (rand() % 45 == 2)
 					{
 						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
-							glm::vec3(0.5f), Ak47Texture, "Ak47"));
+							glm::vec3(0.1f), ak47Model, "Ak47"));
 						addedCollectable = true;
 						ak47InCubes = true;
 					}
@@ -218,7 +225,7 @@ void UpdateCubes()
 					{
 						CubeSpawnTickSpeed -= 0.25f;
 					}
-					if (CubeSpeed <= 20)
+					if (CubeSpeed <= 25)
 					{
 						CubeSpeed += 0.75f;
 					}
@@ -250,6 +257,7 @@ void UpdateBullets()
 	{
 		if (ak47InHand.Position != glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z))
 		{
+			ak47InHand.Rotation = glm::vec3(0.0f, 90.0f, 90.0f);
 			ak47InHand.Position = glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z);
 		}
 		ak47Timer += Time::GetDeltaTime();
@@ -265,7 +273,7 @@ void UpdateBullets()
 			if (ak47ShootTimer > ak47ShootCooldown)
 			{
 				Bullets.push_back(new Cube(glm::vec3(Player->Position.x, Player->Position.y, Player->Position.z + 0.5f),
-					glm::vec3(0.1f, 0.1f, 0.2f), BulletTexture, "Bullet"));
+					glm::vec3(0.0075f, 0.01f, 0.01f), astroidModel, "Bullet"));
 				ak47ShootTimer = 0.0f;
 				SoundEngine->play2D("assets/sounds/shoot.mp3");
 			}
@@ -437,53 +445,53 @@ int main()
 	Cam = Camera(glm::vec3(2.0f, 3.0f, -4.0f));
 	Cubes = CubeList();
 
-	std::shared_ptr<Texture2D> playerTexture = std::make_shared<Texture2D>("assets/textures/lava.jpg");
+	playerModel = std::make_shared<Model>("assets/models/Player/scene.gltf", false);
+	astroidModel = std::make_shared<Model>("assets/models/Astroid/scene.gltf", false);
+	heartModel = std::make_shared<Model>("assets/models/Heart/scene.gltf", false);
+	groundModel = std::make_shared<Model>("assets/models/Ground/scene.gltf", false);
+	ak47Model = std::make_shared<Model>("assets/models/Ak47/scene.gltf", true);
+	skyModel = std::make_shared<Model>("assets/models/Sky/scene.gltf", false);
 
-	Player = new Cube(glm::vec3(2.0f, 0.0f, 1.0f), glm::vec3(0.5f, 1.0f, 0.5f), playerTexture, "Player");
-
-	CubeTexture = std::make_shared<Texture2D>("assets/textures/brick.jpg");
-	HeartTexture = std::make_shared<Texture2D>("assets/textures/heart.png");
-	BulletTexture = std::make_shared<Texture2D>("assets/textures/lava.jpg");
-	Ak47Texture = std::make_shared<Texture2D>("assets/textures/ak47.png");
-	
-	std::shared_ptr<Texture2D> groundTexture = std::make_shared<Texture2D>(
-		"assets/textures/ground.png"
-		);
+	Player = new Cube(glm::vec3(2.0f, 0.0f, 1.0f), glm::vec3(0.3f), playerModel, "Player", glm::vec3(90.0f, 90.0f, 0.0f));
 
 	RenderState::GetShader()->Bind();
-	RenderState::GetShader()->UploadVec4("uFogColor", glm::vec4(0.2f, 0.3f, 0.8f, 1.0f));
+	RenderState::GetShader()->UploadVec4("uFogColor", glm::vec4(45 / 255.0f, 48 / 255.0f, 156 / 255.0f, 1.0f));
+	ak47InHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(0.1f), ak47Model);
 
-	Cube ground = Cube(glm::vec3(0.0f, -7.5f, 10.0f), glm::vec3(30.0f, 10.0f, 30.0f), groundTexture);
-	ak47InHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(0.5f), Ak47Texture);
+	Cube sky = Cube(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(1.0, 1.0, 2.0f), skyModel);
 
 	hasAk47 = false;
 
 
 	SoundEngine->play2D("assets/sounds/music.mp3", true);
 
+
 	while (!glfwWindowShouldClose(GLFWDisplay))
 	{
 		
 		Time::Update();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
+		glClearColor(45 / 255.0f, 48 / 255.0f, 156 / 255.0f, 1.0f);
 
 		RenderState::GetShader()->Bind();
 		RenderState::GetShader()->UploadMat4("uView", Cam.GetViewMatrix());
 		glm::mat4 proj = glm::perspective(glm::radians(45.0f),
 			((float)windowWidth / (float)windowHeight), 0.1f, 1000.0f);
 		RenderState::GetShader()->UploadMat4("uProj", proj);
-		ground.Render();
-		Player->Render();
 		Cubes.RenderCubes();
+		sky.Render();
+		Player->Render();
 
-		if (Input::keyWentDown(GLFW_KEY_A) && Player->Position.x < 4.0f)
+		if (!Suspended)
 		{
-			Player->Position.x += 1.0f;
-		}
-		if (Input::keyWentDown(GLFW_KEY_D) && Player->Position.x > 0.0f)
-		{
-			Player->Position.x -= 1.0f;
+			if (Input::keyWentDown(GLFW_KEY_A) && Player->Position.x < 4.0f)
+			{
+				Player->Position.x += 1.0f;
+			}
+			if (Input::keyWentDown(GLFW_KEY_D) && Player->Position.x > 0.0f)
+			{
+				Player->Position.x -= 1.0f;
+			}
 		}
 		if (!Suspended)
 		{
@@ -504,10 +512,22 @@ int main()
 		{
 			RenderText(scoreText, 25, windowHeight - 50, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
 			RenderText(healthText, windowWidth - 225, windowHeight - 50, 1.0f, glm::vec3(0.9f, 0.2f, 0.3f));
+
+			if (Input::isKeyDown(GLFW_KEY_ESCAPE))
+			{
+				Suspended = true;
+			}
 		}
 		if (Suspended)
 		{
 			RenderText("Press Space to start", windowWidth / 2.0f - 225.0f, windowHeight /  2.0f, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+			if (Input::isKeyDown(GLFW_KEY_SPACE)) {
+				SoundEngine->play2D("assets/sounds/start.mp3");
+				Suspended = false;
+				PlayerHealth = 3;
+				CubeSpeed = 4.0f;
+				CubeSpawnTickSpeed = 1.0f;
+			}
 		}
 		FontShader->Unbind();
 
@@ -524,13 +544,6 @@ int main()
 			}
 
 			Suspended = true;
-			if (Input::isKeyDown(GLFW_KEY_SPACE)) {
-				SoundEngine->play2D("assets/sounds/start.mp3");
-				Suspended = false;
-				PlayerHealth = 3;
-				CubeSpeed = 4.0f;
-				CubeSpawnTickSpeed = 1.0f;
-			}
 		}
 	}
 

@@ -104,13 +104,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\vendor\IrrKlang\include;$(SolutionDir)$(ProjectName)\vendor\freetype\include;$(SolutionDir)$(ProjectName)\vendor\glfw\include;$(SolutionDir)$(ProjectName)\vendor\glad\include;$(SolutionDir)$(ProjectName)\vendor\glm\include;$(SolutionDir)$(ProjectName)\vendor\stb_image</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\vendor\assimp\include;$(SolutionDir)$(ProjectName)\vendor\IrrKlang\include;$(SolutionDir)$(ProjectName)\vendor\freetype\include;$(SolutionDir)$(ProjectName)\vendor\glfw\include;$(SolutionDir)$(ProjectName)\vendor\glad\include;$(SolutionDir)$(ProjectName)\vendor\glm\include;$(SolutionDir)$(ProjectName)\vendor\stb_image</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\vendor\freetype\lib;$(SolutionDir)$(ProjectName)\vendor\glfw\lib-vc2022;$(SolutionDir)$(ProjectName)\vendor\IrrKlang\lib\Winx64-visualStudio</AdditionalLibraryDirectories>
-      <AdditionalDependencies>irrKlang.lib;freetype.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\vendor\freetype\lib;$(SolutionDir)$(ProjectName)\vendor\glfw\lib-vc2022;$(SolutionDir)$(ProjectName)\vendor\IrrKlang\lib\Winx64-visualStudio;$(SolutionDir)$(ProjectName)\vendor\assimp\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;irrKlang.lib;freetype.lib;opengl32.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,7 +136,8 @@
     <ClCompile Include="src\gl_buffer_objects.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\plane.cpp" />
+    <ClCompile Include="src\mesh.cpp" />
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\render_state.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\texture.cpp" />
@@ -151,7 +152,8 @@
     <ClInclude Include="src\cube.h" />
     <ClInclude Include="src\gl_buffer_objects.h" />
     <ClInclude Include="src\input.h" />
-    <ClInclude Include="src\plane.h" />
+    <ClInclude Include="src\mesh.h" />
+    <ClInclude Include="src\model.h" />
     <ClInclude Include="src\render_state.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\texture.h" />
