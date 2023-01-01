@@ -14,6 +14,8 @@ public:
 
 	void RenderCubes();
 
+	Cube* GetCubeByName(const std::string& name);
+
 	std::vector<Cube*> Cubes;
 private:
 };

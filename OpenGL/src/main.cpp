@@ -19,6 +19,8 @@ using namespace irrklang;
 #include "cube_list.h"
 #include "model.h"
 
+#include <functional>
+
 #include FT_FREETYPE_H  
 
 #define global static
@@ -30,11 +32,10 @@ global float CubeSpawnTimer = 0.0f;
 global float CubeSpawnTickSpeed = 1.5f;
 global float CubeSpeed = 4.0f;
 global uint32_t PlayerPoints = 0;
-global uint32_t PlayerHealth = 0;
+global int32_t PlayerHealth = 0;
 global bool Suspended = false;
 global float LastCubeSpawnX = -1.0f;
-global uint32_t MaxCubes = 13;
-global Cube* Player = nullptr;
+global uint32_t MaxCubes = 11;
 global bool hasAk47 = false;
 global float ak47Timer = 0.0f;
 global float ak47MaxTime = 10.0f;
@@ -63,12 +64,120 @@ global std::shared_ptr<Model> spaceShuttleModel = nullptr;
 global std::shared_ptr<Model> swordModel = nullptr;
 global std::shared_ptr<Model> shieldModel = nullptr;
 global float cubeSpeedBeforeItWasChangedBySword;
-global uint32_t ShieldHealth = 0;
+global int32_t ShieldHealth = 0;
 
 #define windowWidth 1280.0f
 #define windowHeight 720.0f
 
 unsigned int FontVAO, FontVBO;
+
+class Item
+{
+public:
+	Item() = default;
+
+	Item(const std::shared_ptr<Model>& model, const glm::vec3& scale,
+		const std::string& name, const glm::vec3& rotation = glm::vec3(0.0f),
+		const glm::vec3& hitBox = glm::vec3(-1.0f))
+		: mModel(model), Scale(scale), Name(name), mCollected(false), Rotation(rotation)
+	{
+		if (hitBox != glm::vec3(-1.0f))
+		{
+			Hitbox = hitBox;
+		}
+		else
+		{
+			Hitbox = scale;
+		}
+	}
+	std::function<void()> OnCollected;
+
+	inline const std::shared_ptr<Model>& GetModel() const
+	{
+		return mModel;
+	}
+
+	inline bool IsCollected() const
+	{
+		return mCollected;
+	}
+	inline void SetCollected(bool collected)
+	{
+		mCollected = collected;
+	}
+
+	void Instantiate(const glm::vec3& position)
+	{
+		Cubes.AddCube(new Cube(position, Scale, mModel, Name, Rotation, Hitbox / 2.0f));
+	}
+
+	glm::vec3 Scale, Rotation, Hitbox;
+	std::string Name;
+private:
+	std::shared_ptr<Model> mModel;
+	bool mCollected;
+};
+
+class Player
+{
+public:
+	Player(const std::shared_ptr<Model>& model, const glm::vec3& position,
+		const glm::vec3& scale, const glm::vec3& hitBox, const glm::vec3& rotation)
+		: mModel(model), Position(position), Scale(scale), HitBox(hitBox), Rotation(rotation)
+	{
+		CubeInstance = new Cube(position, scale, model, "Player", rotation, hitBox / 2.0f);
+	}
+
+	void UpdateItems()
+	{
+		for (auto& cube : Cubes.Cubes)
+		{
+			if (cube->GetName() != "Player")
+			{
+				cube->Position -= CubeSpeed * Time::GetDeltaTime();
+			}
+			for (auto& item : mItems)
+			{
+				if (cube->GetName() == item.Name)
+				{
+					if (item.IsCollected() == false)
+					{
+						item.SetCollected(true);
+						item.OnCollected();
+					}
+				}
+			}
+		}
+	}
+	
+	void AddCollectableItem(const Item& item)
+	{
+		mItems.push_back(item);
+	}
+	void Render()
+	{
+		CubeInstance->Render();
+	}
+
+	void UpdateInput()
+	{
+		if (Input::keyWentDown(GLFW_KEY_A) && Position.x <= 4.0f)
+		{
+			Cam.UpdatePosition(CameraDirection::Left);
+		}
+		if (Input::keyWentDown(GLFW_KEY_D) && Position.x >= 0.0f)
+		{
+			Cam.UpdatePosition(CameraDirection::Right);
+		}
+	}
+	glm::vec3 Scale, Position, HitBox, Rotation;
+	Cube* CubeInstance;
+private:
+	std::vector<Item> mItems;
+	std::shared_ptr<Model> mModel;
+};
+
+global Player* player = nullptr;
 
 bool InitWindow(const std::string& title)
 {
@@ -112,17 +221,6 @@ void TerminateWindow()
 	glfwTerminate();
 }
 
-void UpdateInput()
-{
-	if (Input::keyWentDown(GLFW_KEY_A) && Player->Position.x <= 4.0f)
-	{;
-		Cam.UpdatePosition(CameraDirection::Left);
-	}
-	if (Input::keyWentDown(GLFW_KEY_D) && Player->Position.x >= 0.0f)
-	{
-		Cam.UpdatePosition(CameraDirection::Right);
-	}
-}
 
 void UpdateCubes()
 {
@@ -134,22 +232,21 @@ void UpdateCubes()
 			if (LastCubeSpawnX == -1.0f)
 			{
 				float x_index = rand() % 5;
-				if(rand() % 2 != 1) 
+				if (rand() % 20 == 2)
 				{
-
-					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f),glm::vec3(0.9f, 0.3f, 0.2f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "StrongCube", glm::vec3(0.0f),
 						glm::vec3(0.28f, 0.28f, 0.55f)));
 				}
 				else
 				{
-					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.9f, 0.3f, 0.2f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
 						glm::vec3(0.28f, 0.28f, 0.55f)));
-
 				}
+			
 				bool addedCollectable = false;
 				if (rand() %  10 == 2)
 				{
-					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(1.0f),
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
 						glm::vec3(0.07f), heartModel, "Heart", glm::vec3(90.0f, 180.0f, 0.0f), glm::vec3(0.2f, 0.2f, 0.4f)));
 					addedCollectable = true;
 					
@@ -158,27 +255,25 @@ void UpdateCubes()
 				{
 					if (rand() % 45 == 2)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f),  glm::vec3(1.0f),
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f),
 							glm::vec3(0.1f), ak47Model, "Ak47"));
 						addedCollectable = true;
-						ak47InCubes = true;
 					}
 				}
 				if (!addedCollectable && !swordInCubes && !hasSword && !hasAk47)
 				{
 					if (rand() % 60 == 1)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f), glm::vec3(1.0f),
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f),
 							glm::vec3(0.008f), swordModel, "Sword", glm::vec3(0.0f), glm::vec3(0.008f / 2.0f, 0.008f / 2.0f, 0.008f)));
 						addedCollectable = true;
-						swordInCubes = true;
 					}
 				}
 				if (!addedCollectable && !shieldInCubes && !hasShield && !hasAk47 && !hasSword)
 				{
 					if (rand() % 12 == 2)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(1.0f), glm::vec3(0.1f), shieldModel,
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(0.1f), shieldModel,
 							"Shield", glm::vec3(90.0f, 90.0f, 180.0f)));
 						addedCollectable = true;
 					}
@@ -192,13 +287,20 @@ void UpdateCubes()
 				{
 					x_index = rand() % 5;
 				}
-				Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(1.0f),
-					glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
-					glm::vec3(0.28f, 0.28f, 0.55f)));
+				if (rand() % 20 == 2)
+				{
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "StrongCube", glm::vec3(0.0f),
+						glm::vec3(0.28f, 0.28f, 0.55f)));
+				}
+				else
+				{
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 13.0f), glm::vec3(0.25), astroidModel, "Cube", glm::vec3(0.0f),
+						glm::vec3(0.28f, 0.28f, 0.55f)));
+				}
 				bool addedCollectable = false;
 				if (rand() % 10 == 2)
 				{
-					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(1.0f),
+					Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f),
 						glm::vec3(0.07f), heartModel, "Heart", glm::vec3(90.0f, 180.0f, 0.0f), glm::vec3(0.2f, 0.2f, 0.4f)));
 					addedCollectable = true;
 					
@@ -208,7 +310,7 @@ void UpdateCubes()
 				{
 					if (rand() % 45 == 2)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f), glm::vec3(1.0f),
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f),
 							glm::vec3(0.1f), ak47Model, "Ak47"));
 						addedCollectable = true;
 						ak47InCubes = true;
@@ -218,7 +320,7 @@ void UpdateCubes()
 				{
 					if (rand() % 60 == 1)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f), glm::vec3(1.0f),
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 15.5f),
 							glm::vec3(0.008f), swordModel, "Sword", glm::vec3(0.0f), glm::vec3(0.008f / 2.0f, 0.008f / 2.0f, 0.008f)));
 						addedCollectable = true;
 						swordInCubes = true;
@@ -228,7 +330,7 @@ void UpdateCubes()
 				{
 					if (rand() % 12 == 2)
 					{
-						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(1.0f), glm::vec3(0.1f), shieldModel,
+						Cubes.AddCube(new Cube(glm::vec3(x_index, 0.0f, 14.5f), glm::vec3(0.1f), shieldModel,
 							"Shield", glm::vec3(90.0f, 90.0f, 180.0f)));
 						addedCollectable = true;
 						shieldInCubes = true;
@@ -246,7 +348,7 @@ void UpdateCubes()
 		
 		if (hasShield)
 		{
-			if (cube->GetName() == "Cube")
+			if (cube->GetName() == "Cube" || cube->GetName() ==  "StrongCube")
 			{
 				if (cube->ColldingWithCube(shieldInHand))
 				{
@@ -268,6 +370,13 @@ void UpdateCubes()
 					Cubes.RemoveCube(cube);
 					continue;
 				}
+			}
+			if (cube->GetName() == "StrongCube" && !hasShield)
+			{
+				SoundEngine->play2D("assets/sounds/crash.mp3");
+				PlayerHealth-=3;
+				Cubes.RemoveCube(cube);
+				continue;
 			}
 			else if (cube->GetName() == "Heart")
 			{
@@ -300,14 +409,13 @@ void UpdateCubes()
 		}
 		if (cube->Position.z <= -3.0f)
 		{
-			if (cube->GetName() == "Cube")
+			if (cube->GetName() == "Cube" || cube->GetName() == "StrongCube")
 			{
-
 				PlayerPoints++;
 				SoundEngine->play2D("assets/sounds/coin.mp3");
 				if (PlayerPoints % 15 == 0)
 				{
-					if (MaxCubes > 6)
+					if (MaxCubes > 7)
 					{
 						MaxCubes--;
 					}
@@ -359,8 +467,8 @@ void UpdateBullets()
 			ak47ShootTimer += Time::GetDeltaTime();
 			if (ak47ShootTimer > ak47ShootCooldown)
 			{
-				Bullets.push_back(new Cube(glm::vec3(Player->Position.x, Player->Position.y, Player->Position.z + 0.5f),
-					glm::vec3(1.0f), glm::vec3(0.0075f, 0.01f, 0.01f), astroidModel, "Bullet"));
+				Bullets.push_back(new Cube(glm::vec3(Player->Position.x, Player->Position.y, Player->Position.z + 0.5f), 
+					glm::vec3(0.0075f, 0.01f, 0.01f), astroidModel, "Bullet"));
 				ak47ShootTimer = 0.0f;
 				SoundEngine->play2D("assets/sounds/shoot.mp3");
 			}
@@ -386,6 +494,16 @@ void UpdateBullets()
 					SoundEngine->play2D("assets/sounds/coin.mp3");
 				}
 			}
+			else if (cube->GetName() == "StrongCube")
+			{
+				if (cube->ColldingWithCube(*bullet))
+				{
+					auto it = std::find(Bullets.begin(), Bullets.end(), bullet);
+					if (it != Bullets.end())
+						Bullets.erase(it);
+					SoundEngine->play2D("assets/sounds/coin.mp3");
+				}
+			}
 		}
 	}
 		
@@ -399,7 +517,7 @@ void UpdateSword()
 		{
 			cubeSpeedBeforeItWasChangedBySword = CubeSpeed;
 			CubeSpeed += 4.0f;
-			swordInHand.Position = glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z);
+			swordInHand.Position = glm::vec3(player->Position.x - 0.5f, Player->Position.y, Player->Position.z);
 		}
 		swordTimer += Time::GetDeltaTime();
 		if (swordTimer >= swordMaxTime)
@@ -411,7 +529,7 @@ void UpdateSword()
 		}
 		for (auto& cube : Cubes.Cubes)
 		{
-			if (cube->ColldingWithCube(*Player))
+			if (cube->ColldingWithCube(*player))
 			{
 				if (cube->GetName() == "Cube")
 				{
@@ -430,7 +548,7 @@ void UpdateShield()
 	{
 		if (shieldInHand.Position == glm::vec3(-20.0f, 0.0f, 0.0f))
 		{
-			shieldInHand.Position = glm::vec3(Player->Position.x, Player->Position.y, Player->Position.z + 1.0f);
+			shieldInHand.Position = glm::vec3(player->Position.x, player->Position.y, player->Position.z + 1.0f);
 			ShieldHealth = 3;
 		}
 
@@ -593,20 +711,25 @@ int main()
 	spaceShuttleModel = std::make_shared<Model>("assets/models/Shuttle/scene.gltf", false);
 	shieldModel = std::make_shared<Model>("assets/models/Shield/scene.gltf", false);
 
-	Player = new Cube(glm::vec3(2.0f, 0.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.1f), spaceShuttleModel, "Player", glm::vec3(90.0f, 90.0f, 0.0f), glm::vec3(0.15, 0.15f, 0.15f * 2.0f));
+	player = new Player(spaceShuttleModel, glm::vec3(2.0f, 0.0f, 1.0f), glm::vec3(0.1f), glm::vec3(0.15, 0.15f, 0.15f * 2.0f), glm::vec3(0.0f, 90.0f, 0.0f));
 
-	Cube spaceShuttle1 = Cube(glm::vec3(-1.0f, 0.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.1f), spaceShuttleModel, "Shuttle", glm::vec3(90.0f, 90.0f, 0.0f));
-	Cube spaceShuttle2 = Cube(glm::vec3(5.0f, 0.0f, 3.0f), glm::vec3(1.0f), glm::vec3(0.1f), spaceShuttleModel, "Shuttle", glm::vec3(90.0f, 90.0f, 0.0f));
+	player->AddCollectableItem(Item(heartModel, glm::vec3(0.07f), "Heart", glm::vec3(90.0f, 180.0f, 0.0f), glm::vec3(0.2f, 0.2f, 0.4f)));
+	player->AddCollectableItem(Item(ak47Model, glm::vec3(0.1f), "Ak47"));
+	player->AddCollectableItem(Item(swordModel, glm::vec3(0.008f), "Sword", glm::vec3(0.0f), glm::vec3(0.008f / 2.0f, 0.008f / 2.0f, 0.008f)));
+	player->AddCollectableItem(Item(shieldModel, glm::vec3(0.1f), "Shield", glm::vec3(90.0f, 90.0f, 180.0f)));
+
+	Cube spaceShuttle1 = Cube(glm::vec3(-1.0f, 0.0f, 1.0f), glm::vec3(0.1f), spaceShuttleModel, "Shuttle", glm::vec3(90.0f, 90.0f, 0.0f));
+	Cube spaceShuttle2 = Cube(glm::vec3(5.0f, 0.0f, 3.0f), glm::vec3(0.1f), spaceShuttleModel, "Shuttle", glm::vec3(90.0f, 90.0f, 0.0f));
 
 	RenderState::GetShader()->Bind();
 	RenderState::GetShader()->UploadVec4("uFogColor", glm::vec4(45 / 255.0f, 48 / 255.0f, 156 / 255.0f, 1.0f));
-	ak47InHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.1f), ak47Model);
-	swordInHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(1.0f),
+	ak47InHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(0.1f), ak47Model);
+	swordInHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f),
 		glm::vec3(0.008f), swordModel);
-	shieldInHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.15f), shieldModel,
+	shieldInHand = Cube(glm::vec3(-20.0f, 0.0f, 0.0f), glm::vec3(0.15f), shieldModel,
 		"ShieldInHand", glm::vec3(90.0f, 90.0f, 180.0f), glm::vec3(0.15f / 2.0f, 0.15f / 2.0f, 0.45f / 2.0f));
 
-	Cube sky = Cube(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0, 1.0, 2.0f), skyModel);
+	Cube sky = Cube(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(1.0, 1.0, 2.0f), skyModel);
 
 	hasAk47 = false;
 
@@ -628,24 +751,17 @@ int main()
 		RenderState::GetShader()->UploadMat4("uProj", proj);
 		Cubes.RenderCubes();
 		sky.Render();
-		Player->Render();
+		player->Render();
 
 		if (!Suspended)
 		{
-			if (Input::keyWentDown(GLFW_KEY_A) && Player->Position.x < 4.0f)
-			{
-				Player->Position.x += 1.0f;
-			}
-			if (Input::keyWentDown(GLFW_KEY_D) && Player->Position.x > 0.0f)
-			{
-				Player->Position.x -= 1.0f;
-			}
+			player->UpdateInput();
 		}
 		if (!Suspended)
 		{
 			UpdateBullets();
 			UpdateCubes();
-			UpdateInput();
+			player->UpdateInput();
 			UpdateSword();
 			UpdateShield();
 		}
@@ -678,19 +794,19 @@ int main()
 			if (spaceShuttle2.Position.z <= 0.0f)
 				spaceShuttel2MovingAway = true;
 		}
-		if (ak47InHand.Position == glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z)) {
+		if (ak47InHand.Position == glm::vec3(player->Position.x - 0.5f, player->Position.y, player->Position.z)) {
 			ak47InHand.Render();
-			ak47InHand.Position = glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z);
+			ak47InHand.Position = glm::vec3(player->Position.x - 0.5f, player->Position.y, player->Position.z);
 		}
 		if (swordInHand.Position != glm::vec3(-20.0f, 0.0f, 0.0f))
 		{
 			swordInHand.Render();
-			swordInHand.Position = glm::vec3(Player->Position.x - 0.5f, Player->Position.y, Player->Position.z);
+			swordInHand.Position = glm::vec3(player->Position.x - 0.5f, player->Position.y, player->Position.z);
 		}
 		if (shieldInHand.Position != glm::vec3(-20.0f, 0.0f, 0.0f))
 		{
 			shieldInHand.Render(); 
-			shieldInHand.Position = glm::vec3(Player->Position.x, Player->Position.y, Player->Position.z + 1.0f);
+			shieldInHand.Position = glm::vec3(player->Position.x, player->Position.y, player->Position.z + 1.0f);
 		}
 
 		std::string scoreText = "Score: " + std::to_string(PlayerPoints);
@@ -703,11 +819,29 @@ int main()
 
 			if (ak47Timer != 0.0f)
 			{
-				RenderText("Ak47: " + std::to_string((ceil((ak47MaxTime - ak47Timer) * 100.0f) / 100.0f)), 25, windowHeight - 150, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				if (hasSword)
+				{
+					RenderText("Ak47: " + std::to_string((ceil((ak47MaxTime - ak47Timer) * 100.0f) / 100.0f)), 25, windowHeight - 200, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				}
+				else
+					RenderText("Ak47: " + std::to_string((ceil((ak47MaxTime - ak47Timer) * 100.0f) / 100.0f)), 25, windowHeight - 100, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				
 			}
 			if (swordTimer != 0.0f)
 			{
-				RenderText("Sword: " + std::to_string((ceil((swordMaxTime - swordTimer) * 100.0f) / 100.0f)), 25, windowHeight - 150, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				if(hasAk47)
+					RenderText("Sword: " + std::to_string((ceil((swordMaxTime - swordTimer) * 100.0f) / 100.0f)), 25, windowHeight - 200, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				else
+					RenderText("Sword: " + std::to_string((ceil((swordMaxTime - swordTimer) * 100.0f) / 100.0f)), 25, windowHeight - 100, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+			}
+			if (hasShield)
+			{
+				RenderText("Shield: " + std::to_string(ShieldHealth), windowWidth - 225, windowHeight - 150, 1.0f, glm::vec3(0.9f, 0.9f, 1.0f));
+				player->HitBox = glm::vec3(0.2f * 2.0f, 0.2f * 2.0f, 0.55f * 2.0f);
+			}
+			else
+			{
+				player->HitBox = glm::vec3(0.2f * 2.0f, 0.2f * 2.0f, 0.3f * 2.0f);
 			}
 			if (Input::isKeyDown(GLFW_KEY_ESCAPE))
 			{
@@ -729,6 +863,10 @@ int main()
 					PlayerHealth = 3;
 					CubeSpeed = 4.0f;
 					CubeSpawnTickSpeed = 1.0f;
+					cubeSpeedBeforeItWasChangedBySword = CubeSpeed;
+					if (hasSword) hasSword = !hasSword;
+					if (hasAk47) hasAk47 = !hasAk47;
+					if (hasShield) hasShield = !hasShield;
 				}
 			}
 		}
@@ -742,7 +880,7 @@ int main()
 			{
 				Cubes.Cubes.clear();
 				SoundEngine->play2D("assets/sounds/death.mp3");
-				Player->Position = glm::vec3(2.0f, 0.0f, 1.0f);
+				player->Position = glm::vec3(2.0f, 0.0f, 1.0f);
 			}
 
 			Suspended = true;

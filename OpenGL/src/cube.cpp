@@ -5,10 +5,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-Cube::Cube(const glm::vec3& position, const glm::vec3& col, const glm::vec3& scale, const std::shared_ptr<Model>& model,
+Cube::Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Model>& model,
 	const std::string& name, const glm::vec3& rotation, const glm::vec3& halfScale)
 {
-	this->Color = glm::vec4(col, 1.0f);
 	Position = position;
 	Scale = scale;
 	mModel = model;
@@ -25,7 +24,7 @@ Cube::~Cube()
 {
 }
 
-void Cube::Render()
+void Cube::Render(const glm::vec4& color)
 {
 	Aabb.Position = Position;
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), Position) * 
@@ -36,8 +35,7 @@ void Cube::Render()
 
 	RenderState::GetShader()->Bind();
 	RenderState::GetShader()->UploadMat4("uModel", model);
-	RenderState::GetShader()->UploadVec4("uColor", Color);
-	std::cout << mName << ": " << Color.x << ", " << Color.y << ", " << Color.z << ", " << Color.w << "\n";
+	RenderState::GetShader()->UploadVec4("uColor", color);
 	mModel->Render();
 }
 

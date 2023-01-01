@@ -24,11 +24,11 @@ class Cube
 {
 public:
 	Cube() = default;
-	Cube(const glm::vec3& position, const glm::vec3& col, const glm::vec3& scale, const std::shared_ptr<Model>& model,
+	Cube(const glm::vec3& position, const glm::vec3& scale, const std::shared_ptr<Model>& model,
 		const std::string& name = "Cube", const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& halfScale = glm::vec3(0.0f));
 	~Cube();
 
-	void Render();
+	void Render(const glm::vec4& color = glm::vec4(1.0f));
 
 	bool ColldingWithPoint(const glm::vec3& point);
 
@@ -47,7 +47,6 @@ public:
 	glm::vec3 Position;
 	glm::vec3 Scale;
 	glm::vec3 Rotation;
-	glm::vec4 Color;
 
 	AABB Aabb;
 private:
