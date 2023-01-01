@@ -1,9 +1,36 @@
 ﻿  main.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.16299.0\shared\minwindef.h(130,1): warning C4005: "APIENTRY": Makro-Neudefinition
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\vendor\glfw\include\GLFW\glfw3.h(123): message : Siehe vorherige Definition von "APIENTRY"
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\src\main.cpp(131,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\src\main.cpp(167,19): warning C4244: "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\src\main.cpp(170,23): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\src\main.cpp(430,24): warning C4838: Konvertierung von "FT_Pos" zu "unsigned int" erfordert eine einschränkende Konvertierung
-C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\OpenGL\src\main.cpp(502,12): warning C4244: "Argument": Konvertierung von "time_t" in "unsigned int", möglicher Datenverlust
-  OpenGL.vcxproj -> C:\Users\Administrator\Downloads\BrickGame-main\BrickGame-main\x64\Debug\OpenGL.exe
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
+C:\Users\valen\BrickGameReal\OpenGL\vendor\glfw\include\GLFW\glfw3.h(123,1): message : see previous definition of 'APIENTRY'
+C:\Users\valen\BrickGameReal\OpenGL\src\main.cpp(136,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\valen\BrickGameReal\OpenGL\src\main.cpp(190,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\valen\BrickGameReal\OpenGL\src\main.cpp(193,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\valen\BrickGameReal\OpenGL\src\main.cpp(505,24): warning C4838: conversion from 'FT_Pos' to 'unsigned int' requires a narrowing conversion
+C:\Users\valen\BrickGameReal\OpenGL\src\main.cpp(577,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+freetype.lib(ftinit.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftinit.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftbase.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftbase.obj)' or at ''; linking object as if no debug info
+freetype.lib(autofit.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(autofit.obj)' or at ''; linking object as if no debug info
+freetype.lib(truetype.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(truetype.obj)' or at ''; linking object as if no debug info
+freetype.lib(type1.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(type1.obj)' or at ''; linking object as if no debug info
+freetype.lib(cff.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(cff.obj)' or at ''; linking object as if no debug info
+freetype.lib(type1cid.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(type1cid.obj)' or at ''; linking object as if no debug info
+freetype.lib(pfr.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(pfr.obj)' or at ''; linking object as if no debug info
+freetype.lib(type42.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(type42.obj)' or at ''; linking object as if no debug info
+freetype.lib(winfnt.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(winfnt.obj)' or at ''; linking object as if no debug info
+freetype.lib(pcf.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(pcf.obj)' or at ''; linking object as if no debug info
+freetype.lib(bdf.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(bdf.obj)' or at ''; linking object as if no debug info
+freetype.lib(psaux.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(psaux.obj)' or at ''; linking object as if no debug info
+freetype.lib(psmodule.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(psmodule.obj)' or at ''; linking object as if no debug info
+freetype.lib(pshinter.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(pshinter.obj)' or at ''; linking object as if no debug info
+freetype.lib(sfnt.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(sfnt.obj)' or at ''; linking object as if no debug info
+freetype.lib(smooth.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(smooth.obj)' or at ''; linking object as if no debug info
+freetype.lib(raster.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(raster.obj)' or at ''; linking object as if no debug info
+freetype.lib(sdf.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(sdf.obj)' or at ''; linking object as if no debug info
+freetype.lib(svg.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(svg.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftsystem.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftsystem.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftgzip.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftgzip.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftlzw.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftlzw.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftbitmap.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftbitmap.obj)' or at ''; linking object as if no debug info
+freetype.lib(ftdebug.obj) : warning LNK4099: PDB '' was not found with 'freetype.lib(ftdebug.obj)' or at ''; linking object as if no debug info
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  OpenGL.vcxproj -> C:\Users\valen\BrickGameReal\x64\Debug\OpenGL.exe
